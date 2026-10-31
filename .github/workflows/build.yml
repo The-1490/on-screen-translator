@@ -1,0 +1,19 @@
+name: build-exe
+on:
+  push: {branches: [main]}
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -r requirements.txt
+      - run: >
+          pyinstaller --noconfirm --onedir --windowed --name OnScreenTranslator --paths src
+          --collect-all rapidocr_onnxruntime --collect-all argostranslate --collect-all ctranslate2
+          --collect-all sentencepiece --collect-all stanza run.py
+      - run: Compress-Archive dist/OnScreenTranslator OnScreenTranslator-win64.zip
+      - uses: actions/upload-artifact@v4
+        with: {name: OnScreenTranslator-win64, path: OnScreenTranslator-win64.zip}
